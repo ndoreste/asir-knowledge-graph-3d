@@ -1,0 +1,21 @@
+# Local tooling
+.claude/
+node_modules/
+
+# Generated inside the vault, never published raw
+grafo-data.js
+grafo-completo.html
+grafo-publico.html
+
+# Video work files
+frames/
+*.log
+ffmpeg2pass*
+
+# Obsidian / OS
+.obsidian/
+.trash/
+.DS_Store
+Thumbs.db
+desktop.ini
+.env

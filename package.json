@@ -1,0 +1,19 @@
+{
+  "name": "asir-knowledge-graph-3d",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Interactive 3D knowledge graph of an FP ASIR Obsidian vault, with a sanitized public build and a frame-by-frame video recorder.",
+  "license": "MIT",
+  "author": "Nauzet Doreste",
+  "scripts": {
+    "build": "node scripts/build-public.mjs",
+    "serve": "python -m http.server 8765",
+    "video": "node scripts/record-video.cjs"
+  },
+  "devDependencies": {
+    "playwright-core": "^1.56.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

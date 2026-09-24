@@ -1,0 +1,520 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Grafo de memoria · FP ASIR</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<style>
+  /* Paleta JARVIS del Motor Agentico (palette.ts) */
+  :root {
+    --bg: #050505; --bg2: #0a0a0a; --panel: #161104;
+    --gold: #F5B301; --gold-hi: #FFD400; --gold-deep: #6b4e0a;
+    --cream: #F0ECE0; --muted: #8a8576;
+    --green: #36d98a; --pink: #ED93B1; --orange: #EF9F27; --blue: #5aa6ef; --violet: #9a7bd6;
+    --line: rgba(245,179,1,0.16);
+    --mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--cream); font-family: var(--mono); overflow: hidden; }
+  .stage { position: fixed; inset: 10px; border: 1px solid var(--line); background: radial-gradient(ellipse at 50% 55%, #0d0b05 0%, var(--bg) 70%); }
+  .stage::after { content: ""; position: absolute; top: 10px; right: 10px; width: 18px; height: 18px; border-top: 1px solid var(--gold); border-right: 1px solid var(--gold); opacity: .7; pointer-events: none; }
+  .stage::before { content: ""; position: absolute; bottom: 10px; left: 10px; width: 18px; height: 18px; border-bottom: 1px solid var(--gold); border-left: 1px solid var(--gold); opacity: .7; pointer-events: none; }
+  canvas { position: absolute; inset: 0; display: block; touch-action: none; cursor: grab; }
+
+  header { position: absolute; top: 18px; left: 0; right: 0; text-align: center; pointer-events: none; z-index: 2; padding: 0 16px; }
+  h1 { margin: 0; font-family: "Orbitron", var(--mono); font-weight: 700; font-size: clamp(18px, 2.6vw, 26px); letter-spacing: .14em; color: var(--gold); text-shadow: 0 0 18px rgba(245,179,1,.35); }
+  .sub { margin: 6px 0 0; font-size: 12px; color: var(--muted); letter-spacing: .03em; }
+  .sub b { color: var(--cream); font-weight: 500; }
+
+  .pills { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 14px; pointer-events: auto; }
+  .pill { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px 6px 6px; border-radius: 999px; border: 1px solid rgba(240,236,224,.18); background: rgba(10,10,10,.75); color: var(--cream); font: 500 13px var(--mono); cursor: pointer; transition: border-color .15s, background .15s; }
+  .pill:hover { border-color: rgba(245,179,1,.5); }
+  .pill .ic { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; background: #1a1a1a; font-size: 11px; }
+  .pill[aria-pressed="true"] { border-color: var(--gold); background: rgba(245,179,1,.10); box-shadow: 0 0 0 1px rgba(245,179,1,.25) inset; }
+  .pill:focus-visible, .ctl:focus-visible, .nb:focus-visible, .open:focus-visible { outline: 2px solid var(--gold-hi); outline-offset: 2px; }
+
+  .controls { position: absolute; top: 18px; right: 40px; display: flex; flex-direction: column; gap: 6px; z-index: 3; align-items: flex-end; }
+  .row { display: flex; gap: 6px; }
+  .ctl { padding: 5px 10px; border-radius: 6px; border: 1px solid rgba(240,236,224,.16); background: rgba(10,10,10,.8); color: var(--muted); font: 500 11px var(--mono); cursor: pointer; letter-spacing: .04em; }
+  .ctl[aria-pressed="true"] { color: var(--gold); border-color: rgba(245,179,1,.45); }
+  .search { width: 190px; padding: 6px 10px; border-radius: 6px; border: 1px solid rgba(240,236,224,.16); background: rgba(10,10,10,.85); color: var(--cream); font: 12px var(--mono); }
+  .search::placeholder { color: #6f6b60; }
+  .search:focus { outline: none; border-color: var(--gold); }
+
+  .legend { position: absolute; bottom: 16px; left: 0; right: 0; display: flex; justify-content: center; flex-wrap: wrap; gap: 6px 18px; font-size: 12px; color: var(--muted); z-index: 2; pointer-events: none; padding: 0 16px; }
+  .legend span { display: inline-flex; align-items: center; gap: 7px; }
+  .legend i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+  .stamp { position: absolute; bottom: 16px; right: 40px; font-size: 10px; color: #5d594f; z-index: 2; }
+
+  .tip { position: absolute; z-index: 5; pointer-events: none; min-width: 180px; max-width: 280px; padding: 8px 10px; border-radius: 8px; background: rgba(22,17,4,.94); border: 1px solid rgba(245,179,1,.35); box-shadow: 0 8px 28px rgba(0,0,0,.5); display: none; }
+  .tip .k { font-size: 9px; letter-spacing: .18em; color: var(--muted); }
+  .tip .n { font-size: 12px; font-weight: 600; color: var(--cream); margin-top: 2px; }
+  .tip .m { font-size: 10px; color: var(--muted); margin-top: 3px; }
+
+  .panel { position: absolute; top: 120px; right: 24px; bottom: 56px; width: min(360px, calc(100% - 48px)); z-index: 6; background: rgba(12,10,4,.96); border: 1px solid rgba(245,179,1,.3); border-radius: 12px; padding: 16px 16px 12px; display: none; flex-direction: column; box-shadow: 0 12px 40px rgba(0,0,0,.6); }
+  .panel.on { display: flex; }
+  .panel .k { font-size: 10px; letter-spacing: .2em; color: var(--muted); }
+  .panel h2 { margin: 4px 0 6px; font-size: 16px; line-height: 1.3; color: var(--cream); padding-right: 28px; }
+  .panel .path { font-size: 10px; color: #9d988a; word-break: break-all; }
+  .panel .pv { font-size: 12px; line-height: 1.55; color: #cbc6b8; margin: 10px 0; }
+  .panel .x { position: absolute; top: 10px; right: 10px; width: 28px; height: 28px; border-radius: 6px; border: 1px solid rgba(240,236,224,.16); background: transparent; color: var(--muted); cursor: pointer; font: 14px var(--mono); }
+  .open { display: inline-block; align-self: flex-start; margin: 4px 0 10px; padding: 6px 12px; border-radius: 6px; background: var(--gold); color: #1a1403; font: 600 12px var(--mono); text-decoration: none; }
+  .nbh { font-size: 10px; letter-spacing: .16em; color: var(--muted); margin-top: 4px; }
+  .nbl { overflow-y: auto; margin-top: 6px; display: flex; flex-direction: column; gap: 3px; }
+  .nb { text-align: left; display: flex; align-items: center; gap: 8px; padding: 5px 6px; border-radius: 6px; border: 0; background: transparent; color: var(--cream); font: 12px var(--mono); cursor: pointer; }
+  .nb:hover { background: rgba(245,179,1,.08); }
+  .nb i { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+
+  .empty { position: absolute; inset: 0; display: none; place-items: center; text-align: center; color: var(--muted); font-size: 13px; z-index: 4; padding: 24px; }
+  .empty code { color: var(--gold); }
+
+  /* Ancho medio (p. ej. incrustado en Obsidian): la ayuda del subtítulo chocaría con los controles. */
+  @media (max-width: 1700px) {
+    .sub .hint { display: none; }
+  }
+  @media (max-width: 760px) {
+    .stage { inset: 0; border: 0; }
+    .controls { position: absolute; top: auto; bottom: 52px; right: 12px; left: 12px; align-items: stretch; }
+    .row { justify-content: center; flex-wrap: wrap; }
+    .search { width: 100%; }
+    .stamp { display: none; }
+    .sub .hint { display: none; }
+    .panel { top: auto; right: 0; left: 0; bottom: 0; width: 100%; max-height: 62%; border-radius: 14px 14px 0 0; }
+    .legend { bottom: 8px; font-size: 10px; gap: 4px 10px; }
+  }
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <canvas id="cv" aria-label="Grafo de memoria de la bóveda FP ASIR"></canvas>
+
+  <header>
+    <h1>GRAFO DE MEMORIA</h1>
+    <p class="sub" id="sub">cargando…</p>
+    <div class="pills" role="group" aria-label="Filtrar por curso">
+      <button class="pill" data-f="all" aria-pressed="true"><span class="ic" style="color:var(--cream)">●</span>Todas</button>
+      <button class="pill" data-f="1" aria-pressed="false"><span class="ic" style="color:var(--gold)">1º</span>1º ASIR</button>
+      <button class="pill" data-f="2" aria-pressed="false"><span class="ic" style="color:var(--violet)">2º</span>2º ASIR</button>
+      <button class="pill" data-f="c" aria-pressed="false"><span class="ic" style="color:var(--green)">◆</span>Conceptos</button>
+    </div>
+  </header>
+
+  <div class="controls">
+    <input class="search" id="q" type="search" placeholder="Buscar nota…  (Enter)" aria-label="Buscar nota" list="names">
+    <datalist id="names"></datalist>
+    <div class="row">
+      <button class="ctl" id="bNames" aria-pressed="true">Nombres</button>
+      <button class="ctl" id="bLinks" aria-pressed="true">Conexiones</button>
+      <button class="ctl" id="bSpin" aria-pressed="true">Giro</button>
+      <button class="ctl" id="bIn" aria-label="Acercar">＋</button>
+      <button class="ctl" id="bOut" aria-label="Alejar">－</button>
+    </div>
+  </div>
+
+  <div class="legend" id="legend"></div>
+  <div class="stamp" id="stamp"></div>
+  <div class="tip" id="tip"><div class="k"></div><div class="n"></div><div class="m"></div></div>
+
+  <aside class="panel" id="panel" aria-live="polite">
+    <button class="x" id="px" aria-label="Cerrar detalle">✕</button>
+    <div class="k" id="pk"></div>
+    <h2 id="pn"></h2>
+    <div class="path" id="pp"></div>
+    <div class="pv" id="pv"></div>
+    <a class="open" id="po" href="#">Abrir en Obsidian ↗</a>
+    <div class="nbh" id="pnh"></div>
+    <div class="nbl" id="pl"></div>
+  </aside>
+
+  <div class="empty" id="empty"><div>No hay datos del grafo.<br>Ejecuta <code>node "Sistema/Grafo/generar-grafo.mjs"</code> y recarga.</div></div>
+</div>
+
+<script src="grafo-data.js"></script>
+<script>
+(() => {
+  "use strict";
+  const VAULT_NAME = "FP ASIR";
+  const J = { gold: "#F5B301", goldHi: "#FFD400", cream: "#F0ECE0", muted: "#8a8576", green: "#36d98a", pink: "#ED93B1", orange: "#EF9F27", blue: "#5aa6ef", violet: "#9a7bd6" };
+
+  const KIND = {
+    hub:      { es: "NÚCLEO · INICIO",      color: J.green,  r: 10 },
+    concepto: { es: "CONCEPTO",             color: J.green,  r: 2.6 },
+    moc:      { es: "MAPA DE CONTENIDO",    color: J.cream,  r: 6 },
+    ud:       { es: "UNIDAD DIDÁCTICA",     color: J.gold,   r: 3.2 },
+    ficha:    { es: "FICHA DE ASIGNATURA",  color: J.blue,   r: 3.4 },
+    practica: { es: "PRÁCTICA · PROYECTO",  color: J.violet, r: 2.8 },
+    nota:     { es: "NOTA",                 color: J.gold,   r: 2.6 },
+    faltante: { es: "NOTA FALTANTE",        color: J.pink,   r: 2.4 },
+  };
+  const LEGEND = [
+    ["Núcleo / Concepto", J.green], ["MOC", J.cream], ["Unidad didáctica", J.gold],
+    ["Ficha", J.blue], ["Práctica / Proyecto", J.violet], ["Huérfana", J.orange], ["Faltante", J.pink],
+  ];
+  const COURSE_MOC = /^MOC - (1º ASIR|2º ASIR|Conceptos|Prácticas y recursos|Proyecto Intermodular)$/;
+
+  /* ------------------------------------------------------------ utilidades */
+  function hash32(s) { let h = 2166136261 >>> 0; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+  const h01 = (s) => hash32(s) / 4294967296;
+  function srand(s) { return () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; }; }
+  const clampY = (y) => Math.max(-0.82, Math.min(0.82, y));
+  const reduced = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const $ = (id) => document.getElementById(id);
+
+  const DATA = window.GRAFO_DATA;
+  if (!DATA || !DATA.nodes || !DATA.nodes.length) { $("empty").style.display = "grid"; $("sub").textContent = "sin datos"; return; }
+
+  /* --------------------------------------------------------- escena fija */
+  const nodes = DATA.nodes;
+  const idx = new Map(nodes.map((n, i) => [n.id, i]));
+  const adj = nodes.map(() => new Set());
+  const linkIdx = [];
+  for (const l of DATA.links) {
+    const s = idx.get(l.source), t = idx.get(l.target);
+    if (s == null || t == null) continue;
+    linkIdx.push([s, t]); adj[s].add(t); adj[t].add(s);
+  }
+
+  const colorOf = (n) => (n.kind === "faltante" ? J.pink : n.orphan ? J.orange : KIND[n.kind]?.color ?? J.gold);
+  const radiusOf = (n) => {
+    if (n.kind === "moc") return COURSE_MOC.test(n.name) ? 7 : 6;
+    if (n.kind === "concepto") return 2 + Math.min(3, n.degree * 0.1);
+    return KIND[n.kind]?.r ?? 2.6;
+  };
+  const color = nodes.map(colorOf);
+  const radius = nodes.map(radiusOf);
+
+  // Layout determinista: núcleo al centro; MOC de curso en órbita interior;
+  // MOC de asignatura repartidos en el anillo exterior (1º hacia el plano
+  // verde de abajo, 2º hacia el dorado de arriba); UDs y fichas agrupadas
+  // alrededor de su MOC; conceptos en el baricentro de quien los enlaza.
+  const pos = new Array(nodes.length);
+  const subjMocs = nodes.map((n, i) => [n, i]).filter(([n]) => n.kind === "moc" && !COURSE_MOC.test(n.name))
+    .sort((a, b) => (a[0].course + a[0].name).localeCompare(b[0].course + b[0].name, "es"));
+  subjMocs.forEach(([n, i], k) => {
+    const a = (k / subjMocs.length) * Math.PI * 2 + (h01(n.id) - 0.5) * 0.25;
+    const r = 0.66 + h01(n.id + ":r") * 0.26;
+    const yBase = n.course === "1" ? -0.32 : n.course === "2" ? 0.34 : 0;
+    pos[i] = [Math.cos(a) * r, clampY(yBase + (h01(n.id + ":y") - 0.5) * 0.3), Math.sin(a) * r];
+  });
+  nodes.forEach((n, i) => {
+    if (pos[i]) return;
+    if (n.kind === "hub") pos[i] = [0, 0.04, 0];
+    else if (n.kind === "moc") {
+      const a = h01(n.id) * Math.PI * 2, r = 0.2 + h01(n.id + ":r") * 0.12;
+      pos[i] = [Math.cos(a) * r, clampY(n.course === "1" ? -0.2 : n.course === "2" ? 0.24 : (h01(n.id + ":y") - 0.5) * 0.3), Math.sin(a) * r];
+    }
+  });
+  nodes.forEach((n, i) => {
+    if (pos[i] || n.kind === "concepto" || n.kind === "faltante") return;
+    const ai = n.anchor != null ? idx.get(n.anchor) : undefined;
+    const base = ai != null ? pos[ai] : undefined;
+    const a = h01(n.id) * Math.PI * 2;
+    if (base) {
+      const r = 0.1 + h01(n.id + ":r") * 0.2;
+      pos[i] = [base[0] + Math.cos(a) * r, clampY(base[1] + (h01(n.id + ":y") - 0.5) * 0.34), base[2] + Math.sin(a) * r];
+    } else {
+      const r = 0.45 + h01(n.id + ":r") * 0.45;
+      pos[i] = [Math.cos(a) * r, clampY((h01(n.id + ":y") - 0.5) * 1.1), Math.sin(a) * r];
+    }
+  });
+  for (const pass of ["concepto", "faltante"]) {
+    nodes.forEach((n, i) => {
+      if (n.kind !== pass || pos[i]) return;
+      let sx = 0, sy = 0, sz = 0, c = 0;
+      for (const j of adj[i]) {
+        const p = pos[j]; if (!p || nodes[j].kind === "hub") continue;
+        sx += p[0]; sy += p[1]; sz += p[2]; c++;
+      }
+      const a = h01(n.id) * Math.PI * 2;
+      if (c && pass === "concepto") {
+        // Los conceptos muy transversales tienen su baricentro cerca del centro y se
+        // amontonarían: se reparten en un anillo intermedio (entre núcleo y MOC) que
+        // conserva la DIRECCIÓN hacia las asignaturas que los usan.
+        const bx = sx / c, bz = sz / c, len = Math.hypot(bx, bz);
+        const ang = len > 0.06 ? Math.atan2(bz, bx) + (h01(n.id + ":a") - 0.5) * 0.7 : a;
+        const r = 0.3 + h01(n.id + ":r") * 0.5 + len * 0.3;
+        pos[i] = [Math.cos(ang) * r, clampY((sy / c) * 0.6 + (h01(n.id + ":y") - 0.5) * 0.9), Math.sin(ang) * r];
+      } else if (c) {
+        pos[i] = [sx / c + Math.cos(a) * 0.06, clampY(sy / c + (h01(n.id + ":y") - 0.5) * 0.2), sz / c + Math.sin(a) * 0.06];
+      } else {
+        const r = 0.3 + h01(n.id + ":r") * 0.3;
+        pos[i] = [Math.cos(a) * r, clampY((h01(n.id + ":y") - 0.5) * 0.6), Math.sin(a) * r];
+      }
+    });
+  }
+
+  // Conceptos más conectados: se rotulan con "Nombres" encendido.
+  const topConcepts = new Set(nodes.map((n, i) => [n, i]).filter(([n]) => n.kind === "concepto")
+    .sort((a, b) => b[0].degree - a[0].degree).slice(0, 6).map(([, i]) => i));
+
+  // Marcas "+" decorativas (semilla fija, como en el Motor Agentico).
+  const PLUS = (() => { const R = srand(20260923); const p = []; for (let i = 0; i < 44; i++) p.push([(R() * 2 - 1) * 0.85, (R() * 2 - 1) * 0.7, (R() * 2 - 1) * 0.85]); return p; })();
+
+  /* ------------------------------------------------------------- estado */
+  const st = { yaw: 0.6, tilt: 0.6, zoom: 1, px: 0, py: 0, dragging: false, dx: 0, dy: 0, moved: 0, mx: 0, my: 0, mouseIn: false, hover: -1, lastT: 0, dirty: true };
+  const opts = { names: true, links: true, spin: !reduced };
+  let sel = -1;
+  let visible = nodes.map(() => true);
+
+  /* ------------------------------------------------------------- filtros */
+  function applyFilter(f) {
+    visible = nodes.map((n) => {
+      if (n.kind === "hub" || f === "all") return true;
+      if (f === "c") return n.kind === "concepto" || n.name === "MOC - Conceptos";
+      const cs = n.course ? [n.course] : n.courses || [];
+      return cs.includes(f);
+    });
+    if (sel >= 0 && !visible[sel]) closePanel();
+    document.querySelectorAll(".pill").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.f === f)));
+    updateSub(); st.dirty = true;
+  }
+
+  /* ----------------------------------------------------------------- UI */
+  const S = DATA.stats || {};
+  function updateSub() {
+    const vn = visible.filter(Boolean).length;
+    const vl = linkIdx.filter(([a, b]) => visible[a] && visible[b]).length;
+    const sub = $("sub"); sub.textContent = "";
+    const add = (t, bold) => { const e = document.createElement(bold ? "b" : "span"); e.textContent = t; sub.appendChild(e); };
+    add(String(vn), true); add(" notas · "); add(String(vl), true); add(" conexiones · ");
+    add(String(S.uds ?? 0), true); add(" UDs · "); add(String(S.conceptos ?? 0), true); add(" conceptos");
+    const h = document.createElement("span"); h.className = "hint"; h.textContent = " · arrastra para rotar · rueda para zoom · hover para inspeccionar · clic para detalle"; sub.appendChild(h);
+  }
+  const lg = $("legend");
+  for (const [t, c] of LEGEND) { const s = document.createElement("span"); const i = document.createElement("i"); i.style.background = c; s.append(i, t); lg.appendChild(s); }
+  $("stamp").textContent = `generado ${S.generado ?? "—"} · ${S.huerfanas ?? 0} huérfanas · ${S.faltantes ?? 0} faltantes`;
+  const dl = $("names");
+  [...nodes].filter((n) => n.kind !== "faltante").sort((a, b) => a.name.localeCompare(b.name, "es")).forEach((n) => { const o = document.createElement("option"); o.value = n.name; dl.appendChild(o); });
+
+  const toggle = (id, key) => { const b = $(id); b.setAttribute("aria-pressed", String(opts[key])); b.onclick = () => { opts[key] = !opts[key]; b.setAttribute("aria-pressed", String(opts[key])); st.dirty = true; }; };
+  toggle("bNames", "names"); toggle("bLinks", "links"); toggle("bSpin", "spin");
+  $("bIn").onclick = () => zoomAt(1.25);
+  $("bOut").onclick = () => zoomAt(1 / 1.25);
+  document.querySelectorAll(".pill").forEach((b) => (b.onclick = () => applyFilter(b.dataset.f)));
+
+  /* --------------------------------------------------------------- panel */
+  const courseLabel = (n) => (n.course ? `${n.course}º ASIR` : (n.courses || []).map((c) => `${c}º`).join(" + ") || "transversal");
+  function openPanel(i) {
+    sel = i; const n = nodes[i];
+    $("pk").textContent = n.orphan ? "NOTA HUÉRFANA" : KIND[n.kind]?.es ?? n.kind.toUpperCase();
+    $("pk").style.color = color[i];
+    $("pn").textContent = n.name;
+    $("pp").textContent = n.kind === "faltante" ? "no existe todavía" : `${n.id} · ${courseLabel(n)}`;
+    $("pv").textContent = n.preview || "";
+    const po = $("po");
+    if (n.kind === "faltante") po.style.display = "none";
+    else { po.style.display = ""; po.href = `obsidian://open?vault=${encodeURIComponent(VAULT_NAME)}&file=${encodeURIComponent(n.id.replace(/\.md$/i, ""))}`; }
+    const list = $("pl"); list.textContent = "";
+    const nb = [...adj[i]].sort((a, b) => nodes[a].name.localeCompare(nodes[b].name, "es"));
+    $("pnh").textContent = `CONEXIONES (${nb.length})`;
+    for (const j of nb) {
+      const b = document.createElement("button"); b.className = "nb";
+      const dot = document.createElement("i"); dot.style.background = color[j];
+      b.append(dot, nodes[j].name);
+      b.onclick = () => { if (!visible[j]) applyFilter("all"); openPanel(j); };
+      list.appendChild(b);
+    }
+    $("panel").classList.add("on"); st.dirty = true;
+  }
+  function closePanel() { sel = -1; $("panel").classList.remove("on"); st.dirty = true; }
+  $("px").onclick = closePanel;
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") closePanel(); });
+  $("q").addEventListener("keydown", (e) => {
+    if (e.key !== "Enter") return;
+    const q = e.target.value.trim().toLowerCase(); if (!q) return;
+    let best = -1, bs = 1e9;
+    nodes.forEach((n, i) => { const k = n.name.toLowerCase().indexOf(q); if (k >= 0 && n.kind !== "faltante") { const sc = k * 10 + n.name.length; if (sc < bs) { bs = sc; best = i; } } });
+    if (best >= 0) { if (!visible[best]) applyFilter("all"); openPanel(best); }
+  });
+
+  /* ------------------------------------------------------------- render */
+  const cv = $("cv"), ctx = cv.getContext("2d"), wrap = $("stage"), tip = $("tip");
+  const DPR = Math.min(window.devicePixelRatio || 1, 2);
+  let W = 1, H = 1;
+  const resize = () => { const r = wrap.getBoundingClientRect(); W = cv.width = Math.max(1, Math.round(r.width * DPR)); H = cv.height = Math.max(1, Math.round(r.height * DPR)); cv.style.width = r.width + "px"; cv.style.height = r.height + "px"; st.dirty = true; };
+  resize(); new ResizeObserver(resize).observe(wrap);
+
+  const NP = [];
+  function hitTest(mx, my) {
+    let best = -1, hd = 1e18;
+    for (let k = 0; k < nodes.length; k++) {
+      if (!visible[k]) continue;
+      const q = NP[k]; if (!q) continue;
+      const rr = Math.max(0.6, DPR * radius[k] * q[3]);
+      const hitR = Math.max(9 * DPR, rr * 1.9);
+      const dx = q[0] - mx, dy = q[1] - my, d = dx * dx + dy * dy;
+      if (d < hitR * hitR && d < hd) { hd = d; best = k; }
+    }
+    return best;
+  }
+
+  function draw() {
+    const t = performance.now(); if (!st.lastT) st.lastT = t;
+    const dt = Math.min(60, t - st.lastT); st.lastT = t;
+    if (!st.dragging && opts.spin) st.yaw += dt * (st.hover >= 0 ? 0.00002 : 0.00012);
+
+    const cx = W / 2 + st.px, cy = H / 2 + H * 0.04 + st.py, Sc = Math.min(W, H) * 0.4 * st.zoom, f = 2.7;
+    const cyw = Math.cos(st.yaw), syw = Math.sin(st.yaw), ctl = Math.cos(st.tilt), stl = Math.sin(st.tilt);
+    const P = (x, y, z) => { const X = x * cyw - z * syw, Z0 = x * syw + z * cyw, Y2 = y * ctl - Z0 * stl, Z2 = y * stl + Z0 * ctl; const sc = f / Math.max(0.1, f + Z2); return [cx + X * sc * Sc, cy - Y2 * sc * Sc, Z2, sc]; };
+
+    ctx.clearRect(0, 0, W, H);
+    // Dos planos wireframe: dorado arriba, verde abajo.
+    const plane = (py, col) => {
+      const G = 6, stp = 1.5 / G; ctx.strokeStyle = col; ctx.lineWidth = DPR * 0.7; ctx.globalAlpha = 0.45;
+      for (let i = -G; i <= G; i++) {
+        let a = P(-1.5, py, i * stp), b = P(1.5, py, i * stp); ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke();
+        a = P(i * stp, py, -1.5); b = P(i * stp, py, 1.5); ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+    };
+    plane(0.92, J.gold); plane(-0.92, J.green);
+
+    NP.length = nodes.length;
+    for (let k = 0; k < nodes.length; k++) { const p = pos[k], q = P(p[0], p[1], p[2]); NP[k] = [Math.round(q[0]), Math.round(q[1]), q[2], q[3]]; }
+
+    const hv = st.mouseIn && !st.dragging ? hitTest(st.mx, st.my) : -1;
+    if (hv !== st.hover) { st.hover = hv; showTip(hv); }
+    const focus = hv >= 0 ? hv : sel;
+    const nb = focus >= 0 ? adj[focus] : null;
+    cv.style.cursor = st.dragging ? "grabbing" : hv >= 0 ? "pointer" : "grab";
+
+    // Enlaces (los del nodo enfocado siempre se ven, aunque "Conexiones" esté apagado).
+    for (const [i, j] of linkIdx) {
+      if (!visible[i] || !visible[j]) continue;
+      const hot = focus >= 0 && (i === focus || j === focus);
+      if (!opts.links && !hot) continue;
+      const a = NP[i], b = NP[j];
+      if (hot) { ctx.strokeStyle = "rgba(255,212,0,.9)"; ctx.lineWidth = 1.4 * DPR; }
+      else {
+        const depth = Math.min(1.15, Math.max(0.45, (a[3] + b[3]) / 2));
+        const alpha = focus >= 0 ? 0.04 : 0.3 * depth;
+        ctx.strokeStyle = `rgba(245,179,1,${alpha.toFixed(3)})`; ctx.lineWidth = 0.5 * DPR;
+      }
+      ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke();
+    }
+
+    ctx.strokeStyle = focus >= 0 ? "rgba(240,236,230,.12)" : "rgba(240,236,230,.38)"; ctx.lineWidth = DPR * 0.6;
+    for (const p of PLUS) { const q = P(p[0], p[1], p[2]), s = q[3] * DPR * 2.4; ctx.beginPath(); ctx.moveTo(q[0] - s, q[1]); ctx.lineTo(q[0] + s, q[1]); ctx.moveTo(q[0], q[1] - s); ctx.lineTo(q[0], q[1] + s); ctx.stroke(); }
+
+    // Nodos por profundidad (painter's algorithm).
+    const items = [];
+    for (let k = 0; k < nodes.length; k++) if (visible[k]) items.push(k);
+    items.sort((a, b) => NP[b][2] - NP[a][2]);
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    const labels = [];
+    for (const k of items) {
+      const [x, y, , sc] = NP[k];
+      const state = focus < 0 ? 1 : k === focus ? 2 : nb && nb.has(k) ? 1 : 0;
+      const dim = state === 0, big = state === 2;
+      const rr = Math.max(0.6, DPR * radius[k] * sc * (big ? 1.3 : 1));
+      ctx.fillStyle = color[k];
+      ctx.globalAlpha = dim ? 0.05 : big ? 0.32 : 0.16; ctx.beginPath(); ctx.arc(x, y, rr * (big ? 2.9 : 2.2), 0, 7); ctx.fill();
+      ctx.globalAlpha = dim ? 0.18 : big ? 1 : 0.9; ctx.beginPath(); ctx.arc(x, y, rr, 0, 7); ctx.fill();
+      ctx.globalAlpha = dim ? 0.1 : Math.min(1, 0.28 + sc * 0.5); ctx.fillStyle = "#ffffff"; ctx.beginPath(); ctx.arc(x - rr * 0.3, y - rr * 0.3, rr * 0.3, 0, 7); ctx.fill();
+      if (big) { ctx.globalAlpha = 1; ctx.strokeStyle = J.goldHi; ctx.lineWidth = 1.5 * DPR; ctx.beginPath(); ctx.arc(x, y, rr * 1.75, 0, 7); ctx.stroke(); }
+      ctx.globalAlpha = 1;
+      const n = nodes[k];
+      const wants = big || (focus >= 0 && state === 1 && n.kind !== "ud" && n.kind !== "nota") ||
+        (opts.names && focus < 0 && (n.kind === "moc" || n.kind === "hub" || topConcepts.has(k) ||
+          (st.zoom >= ZOOM_LABELS_CONCEPTS && n.kind === "concepto") || (st.zoom >= ZOOM_LABELS_ALL && n.kind !== "faltante")));
+      if (wants) labels.push([k, x, y + rr + 9 * DPR, big]);
+    }
+    for (const [k, x, y, big] of labels) {
+      const n = nodes[k];
+      const txt = n.kind === "hub" ? "FP ASIR" : n.name.replace(/^MOC - /, "");
+      ctx.font = `${big ? 600 : 500} ${Math.max(8, Math.round((big ? 11 : 9.5) * DPR))}px "JetBrains Mono", monospace`;
+      ctx.globalAlpha = big ? 1 : n.kind === "concepto" ? 0.62 : 0.88;
+      ctx.fillStyle = n.kind === "concepto" ? "#bfeed6" : J.cream;
+      ctx.fillText(txt.length > 30 ? txt.slice(0, 29) + "…" : txt, x, y);
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function showTip(k) {
+    if (k < 0) { tip.style.display = "none"; return; }
+    const n = nodes[k];
+    tip.querySelector(".k").textContent = n.orphan ? "NOTA HUÉRFANA" : KIND[n.kind]?.es ?? "";
+    tip.querySelector(".n").textContent = n.name;
+    tip.querySelector(".m").textContent = `${adj[k].size} conexiones · ${courseLabel(n)}`;
+    tip.style.display = "block";
+  }
+
+  let raf = 0, running = true;
+  const frame = () => {
+    if (!running) return;
+    if ((opts.spin && !reduced) || st.dragging || st.mouseIn || st.dirty) { st.dirty = false; draw(); } else st.lastT = 0;
+    raf = requestAnimationFrame(frame);
+  };
+  raf = requestAnimationFrame(frame);
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) { running = false; cancelAnimationFrame(raf); }
+    else if (!running) { running = true; st.lastT = 0; raf = requestAnimationFrame(frame); }
+  });
+
+  /* -------------------------------------------------------- interacción */
+  // Escala el zoom manteniendo fijo el punto (mx,my) de la pantalla; sin punto, el centro.
+  function zoomAt(factor, mx = W / 2, my = H / 2) {
+    const z = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, st.zoom * factor)), k = z / st.zoom;
+    const ox = W / 2 + st.px, oy = H / 2 + H * 0.04 + st.py;
+    st.px = mx - (mx - ox) * k - W / 2; st.py = my - (my - oy) * k - H / 2 - H * 0.04;
+    if (z <= 1) { st.px *= z; st.py *= z; } // al alejar del todo, el grafo vuelve al centro
+    st.zoom = z; st.dirty = true;
+  }
+  const ZOOM_MIN = 0.4, ZOOM_MAX = 8, WHEEL_SPEED = 0.0015, ZOOM_LABELS_CONCEPTS = 1.8, ZOOM_LABELS_ALL = 3, LINE_PX = 16;
+  const TMIN = -Math.PI / 2, TMAX = Math.PI / 2;
+  cv.addEventListener("pointermove", (e) => {
+    const r = cv.getBoundingClientRect();
+    st.mx = (e.clientX - r.left) * DPR; st.my = (e.clientY - r.top) * DPR; st.mouseIn = true;
+    if (st.dragging) {
+      const dx = e.clientX - st.dx, dy = e.clientY - st.dy;
+      if (st.panning) { st.px += dx * DPR; st.py += dy * DPR; }
+      else { st.yaw += dx * 0.004; st.tilt = Math.min(TMAX, Math.max(TMIN, st.tilt - dy * 0.003)); }
+      st.dx = e.clientX; st.dy = e.clientY; st.moved += Math.abs(dx) + Math.abs(dy);
+    }
+    const wr = wrap.getBoundingClientRect();
+    tip.style.left = Math.min(e.clientX - wr.left + 14, Math.max(8, wr.width - 290)) + "px";
+    tip.style.top = Math.min(e.clientY - wr.top + 14, Math.max(8, wr.height - 90)) + "px";
+  });
+  cv.addEventListener("pointerleave", () => { st.mouseIn = false; st.dragging = false; st.hover = -1; showTip(-1); st.dirty = true; });
+  cv.addEventListener("pointerdown", (e) => {
+    const r = cv.getBoundingClientRect();
+    st.mx = (e.clientX - r.left) * DPR; st.my = (e.clientY - r.top) * DPR; st.mouseIn = true;
+    st.dragging = true; st.dx = e.clientX; st.dy = e.clientY; st.moved = 0;
+    // Con el grafo ampliado, arrastrar lo desplaza; sin ampliar, lo gira.
+    // Mayús o botón derecho hacen lo contrario, para poder girar también estando ampliado.
+    const alt = e.shiftKey || e.button === 2;
+    st.panning = st.zoom > 1 ? !alt : alt;
+    cv.style.cursor = st.panning ? "move" : "grabbing";
+    if (cv.setPointerCapture) cv.setPointerCapture(e.pointerId);
+  });
+  cv.addEventListener("contextmenu", (e) => e.preventDefault());
+  cv.addEventListener("lostpointercapture", () => { cv.style.cursor = ""; });
+  cv.addEventListener("pointerup", (e) => {
+    const wasClick = st.moved < 6; st.dragging = false; st.dirty = true;
+    if (!wasClick) return;
+    const k = hitTest(st.mx, st.my);
+    if (k >= 0) openPanel(k); else closePanel();
+    if (e.pointerType !== "mouse") { st.mouseIn = false; showTip(-1); }
+  });
+  // Rueda del ratón: zoom hacia el cursor, como el grafo de Obsidian. Doble clic: vista inicial.
+  // Deslizar a izquierda/derecha (touchpad, rueda lateral o Mayús+rueda) desplaza el grafo en horizontal.
+  cv.addEventListener("wheel", (e) => {
+    e.preventDefault();
+    const sideways = e.shiftKey ? e.deltaY || e.deltaX : e.deltaX;
+    if (Math.abs(sideways) > Math.abs(e.shiftKey ? 0 : e.deltaY)) {
+      st.px -= sideways * (e.deltaMode === 1 ? LINE_PX : 1) * DPR; st.dirty = true;
+      return;
+    }
+    const r = cv.getBoundingClientRect();
+    zoomAt(Math.exp(-e.deltaY * WHEEL_SPEED), (e.clientX - r.left) * DPR, (e.clientY - r.top) * DPR);
+  }, { passive: false });
+  cv.addEventListener("dblclick", () => { st.zoom = 1; st.px = 0; st.py = 0; st.dirty = true; });
+
+  applyFilter("all");
+})();
+</script>
+</body>
+</html>
