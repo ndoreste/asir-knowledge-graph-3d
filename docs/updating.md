@@ -1,14 +1,14 @@
-# Updating the repository
+# Actualizar el repositorio
 
-The vault keeps growing during 2nd year. One script brings the repository up to date.
+El vault sigue creciendo durante 2º. Un único script pone el repositorio al día.
 
-## Requirements
+## Requisitos
 
-- Windows + PowerShell 7 (the script also works in Windows PowerShell 5.1)
+- Windows + PowerShell 7 (el script también funciona en Windows PowerShell 5.1)
 - Node.js 18+
-- For the video only: `npm install`, ffmpeg on `PATH`, Python (local web server) and Google Chrome (or `CHROME_PATH`)
+- Solo para el vídeo: `npm install`, ffmpeg en el `PATH`, Python (servidor web local) y Google Chrome (o `CHROME_PATH`)
 
-## Workflow
+## Flujo de trabajo
 
 ```powershell
 # 1. Regenerate the graph in the vault, sync vault-tools/ and rebuild index.html
@@ -21,9 +21,9 @@ git diff --stat
 .\scripts\update-from-vault.ps1 -Video -Push
 ```
 
-`-VaultPath` defaults to `%USERPROFILE%\Desktop\FP ASIR`; pass another path if the vault moves.
+`-VaultPath` tiene como valor por defecto `%USERPROFILE%\Desktop\FP ASIR`; pasa otra ruta si el vault cambia de ubicación.
 
-## Manual steps
+## Pasos manuales
 
 ```bash
 node "<vault>/Sistema/Grafo/generar-grafo.mjs"      # regenerate grafo-data.js inside the vault
@@ -32,10 +32,10 @@ python -m http.server 8765                          # serve the repo
 node scripts/record-video.cjs 10                    # 10-second video → assets/video/
 ```
 
-After a video update, regenerate the README preview:
+Después de actualizar el vídeo, regenera la vista previa del README:
 
 ```bash
 ffmpeg -y -i assets/video/asir-knowledge-graph-3d-demo.mp4 -vf "fps=10,scale=640:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=64:stats_mode=diff[p];[b][p]paletteuse=dither=none:diff_mode=rectangle" assets/img/graph-preview.gif
 ```
 
-Remember to update the *Snapshot* table in the README with the numbers printed by the generator.
+Recuerda actualizar la tabla *Estado actual* del README con las cifras que muestra el generador.

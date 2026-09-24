@@ -1,35 +1,35 @@
-# Privacy
+# Privacidad
 
-The vault contains personal and third-party information that must never reach a public repository. The public build is designed to fail closed.
+El vault contiene información personal y de terceros que nunca debe llegar a un repositorio público. El build público está diseñado para fallar de forma segura (fail closed).
 
-## What is published
+## Qué se publica
 
-- `index.html`: the viewer with the graph data inlined. Each node has a name, type, course, degree and a **sanitized** preview (~260 characters).
-- The demo video and screenshots, which only show node titles and global statistics.
-- The tools and empty templates.
+- `index.html`: el visor con los datos del grafo incrustados. Cada nodo tiene nombre, tipo, curso, grado y una vista previa **saneada** (~260 caracteres).
+- El vídeo de demostración y las capturas de pantalla, que solo muestran títulos de nodos y estadísticas globales.
+- Las herramientas y las plantillas vacías.
 
-## What is never published
+## Qué no se publica nunca
 
-- Raw notes, PDFs, attachments or course material.
-- `.obsidian/` configuration and local absolute paths.
-- The *Abrir en Obsidian* button (hidden: it only works on the author's machine).
+- Notas originales, PDFs, adjuntos ni material del curso.
+- La configuración de `.obsidian/` ni rutas absolutas locales.
+- El botón *Abrir en Obsidian* (oculto: solo funciona en el equipo del autor).
 
-## Sanitization rules (`scripts/build-public.mjs`)
+## Reglas de saneamiento (`scripts/build-public.mjs`)
 
-| Data | Replacement |
+| Dato | Sustitución |
 |---|---|
-| E-mail addresses | `[correo]` |
-| School LMS, Kahoot, NotebookLM, Google Drive/Docs/Forms, Classroom, Teams, Meet links | `[enlace privado]` |
-| Tracking parameters (`si`, `authuser`, `utm_*`) on public links | removed |
-| `Profesor/a: Name Surname` (and variants) | `Profesor/a: [docente]` |
-| `Horario: …` class timetables | `Horario: [horario omitido]` |
+| Direcciones de correo electrónico | `[correo]` |
+| Enlaces al LMS del centro, Kahoot, NotebookLM, Google Drive/Docs/Forms, Classroom, Teams, Meet | `[enlace privado]` |
+| Parámetros de seguimiento (`si`, `authuser`, `utm_*`) en enlaces públicos | se eliminan |
+| `Profesor/a: Name Surname` (y variantes) | `Profesor/a: [docente]` |
+| Horarios de clase `Horario: …` | `Horario: [horario omitido]` |
 
-Sanitization happens on the **data** (each preview string) before it is injected into the HTML, not with regexes over the final page.
+El saneamiento se aplica sobre los **datos** (cada cadena de vista previa) antes de inyectarlos en el HTML, no con expresiones regulares sobre la página final.
 
-## Fail-closed check
+## Comprobación fail-closed
 
-After building, the script scans the final HTML again for e-mails, private links and every teacher name it detected. If anything is found it prints the leak and exits with code 1 **without writing** `index.html`, so `update-from-vault.ps1` stops before committing.
+Tras el build, el script vuelve a analizar el HTML final en busca de correos electrónicos, enlaces privados y cada nombre de docente que haya detectado. Si encuentra algo, muestra la filtración y termina con código 1 **sin escribir** `index.html`, de modo que `update-from-vault.ps1` se detiene antes de hacer commit.
 
-## Adding new rules
+## Añadir nuevas reglas
 
-If a new kind of private data appears (for example a new platform), add its domain to `PRIVATE_URL` or a new pattern in `sanitizeText()` and run `node scripts/build-public.mjs` to verify.
+Si aparece un nuevo tipo de dato privado (por ejemplo, una plataforma nueva), añade su dominio a `PRIVATE_URL` o un nuevo patrón en `sanitizeText()` y ejecuta `node scripts/build-public.mjs` para verificarlo.

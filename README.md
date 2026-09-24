@@ -1,38 +1,38 @@
 # ASIR Knowledge Graph 3D
 
-Interactive 3D knowledge graph of my FP ASIR (Network & Systems Administration) studies, built on top of an Obsidian vault with a custom Node.js pipeline and a zero-dependency Canvas renderer.
+Grafo de conocimiento 3D interactivo de mis estudios de FP ASIR (Administración de Sistemas Informáticos en Red), construido sobre un vault de Obsidian con un pipeline propio en Node.js y un renderizador en Canvas sin dependencias.
 
-**[▶ Live demo](https://ndoreste.github.io/asir-knowledge-graph-3d/)** · **[🎬 Demo video (MP4)](assets/video/asir-knowledge-graph-3d-demo.mp4)**
+**[▶ Demo en vivo](https://ndoreste.github.io/asir-knowledge-graph-3d/)** · **[🎬 Vídeo de demostración (MP4)](assets/video/asir-knowledge-graph-3d-demo.mp4)**
 
-[![3D knowledge graph rotating](assets/img/graph-preview.gif)](https://ndoreste.github.io/asir-knowledge-graph-3d/)
+[![Grafo de conocimiento 3D girando](assets/img/graph-preview.gif)](https://ndoreste.github.io/asir-knowledge-graph-3d/)
 
-> Work in progress: the vault grows every week while I study 2nd year ASIR, and this repository is refreshed with a single script.
+> Trabajo en curso: el vault crece cada semana mientras curso 2º de ASIR, y este repositorio se actualiza con un único script.
 
-## Goal
+## Objetivo
 
-Turn two years of course material into a **connected knowledge network** instead of a folder of PDFs:
+Convertir dos años de material del ciclo en una **red de conocimiento conectada** en lugar de una carpeta de PDFs:
 
-- Every teaching unit (UD) gets a summary note.
-- Units are linked through **concept notes** (RAID, DNS, normalization, LDAP…) that appear across subjects and across both years.
-- A generator script keeps the backlinks, indexes and the graph data up to date automatically.
-- The result is explorable as a 3D graph in the browser: rotate, zoom, filter by year and click any node to read its summary.
+- Cada unidad didáctica (UD) tiene una nota de resumen.
+- Las unidades se enlazan mediante **notas de concepto** (RAID, DNS, normalización, LDAP…) que aparecen en varias asignaturas y en ambos cursos.
+- Un script generador mantiene actualizados automáticamente los backlinks, los índices y los datos del grafo.
+- El resultado se puede explorar como un grafo 3D en el navegador: rotar, hacer zoom, filtrar por curso y hacer clic en cualquier nodo para leer su resumen.
 
-## Snapshot (2026-09-23)
+## Estado actual (2026-09-23)
 
-| Notes | Links | Teaching units | Concepts | Orphans | Missing links |
+| Notas | Enlaces | Unidades didácticas | Conceptos | Huérfanas | Enlaces faltantes |
 |---:|---:|---:|---:|---:|---:|
-| 319 | 2,856 | 57 | 191 | 0 | 0 |
+| 319 | 2856 | 57 | 191 | 0 | 0 |
 
-## What this project demonstrates
+## Qué demuestra este proyecto
 
-- **Knowledge management design**: folder taxonomy, note types, templates and MOCs (Maps of Content) for a two-year curriculum.
-- **Automation with Node.js**: a dependency-free script that parses Markdown frontmatter and `[[wikilinks]]`, resolves aliases/anchors/embeds, and writes auto-generated sections back into the notes.
-- **Data quality checks**: orphan notes, broken links, missing notes and broken attachments are reported on every run.
-- **Custom 3D rendering**: perspective projection, camera orbit, zoom, picking and filtering written by hand on the Canvas 2D API — no Three.js, no D3.
-- **Privacy by design**: the public build strips e-mails, private platform links, teacher names and timetables, and **fails** if anything leaks.
-- **Reproducible media**: the demo video is rendered frame by frame with Playwright + ffmpeg, so it is smooth and can be regenerated after each update.
+- **Diseño de gestión del conocimiento**: taxonomía de carpetas, tipos de nota, plantillas y MOCs (Maps of Content) para un plan de estudios de dos años.
+- **Automatización con Node.js**: un script sin dependencias que analiza el frontmatter de Markdown y los `[[wikilinks]]`, resuelve alias/anclas/embeds y escribe secciones autogeneradas de vuelta en las notas.
+- **Controles de calidad de datos**: en cada ejecución se informa de notas huérfanas, enlaces rotos, notas inexistentes y adjuntos rotos.
+- **Renderizado 3D propio**: proyección en perspectiva, órbita de cámara, zoom, selección y filtrado escritos a mano sobre la API Canvas 2D, sin Three.js ni D3.
+- **Privacidad desde el diseño**: el build público elimina correos electrónicos, enlaces a plataformas privadas, nombres de docentes y horarios, y **falla** si se filtra algo.
+- **Material audiovisual reproducible**: el vídeo de demostración se renderiza fotograma a fotograma con Playwright + ffmpeg, de modo que es fluido y puede regenerarse tras cada actualización.
 
-## How it works
+## Cómo funciona
 
 ```text
 Obsidian vault (Markdown)
@@ -47,9 +47,9 @@ scripts/build-public.mjs ───────► sanitizes node previews ──
 scripts/record-video.cjs ───────► Playwright renders 600 frames ──► ffmpeg ──► demo MP4
 ```
 
-More detail in [docs/architecture.md](docs/architecture.md).
+Más detalle en [docs/architecture.md](docs/architecture.md).
 
-## Repository structure
+## Estructura del repositorio
 
 ```text
 asir-knowledge-graph-3d/
@@ -79,19 +79,19 @@ asir-knowledge-graph-3d/
 └── .gitignore
 ```
 
-## Graph legend
+## Leyenda del grafo
 
-| Color | Node type |
+| Color | Tipo de nodo |
 |---|---|
-| 🟢 Green | Hub / concept |
-| ⚪ Cream | MOC (map of content) |
-| 🟡 Gold | Teaching unit (UD) |
-| 🔵 Blue | Subject sheet |
-| 🟣 Violet | Lab / project |
-| 🟠 Orange | Orphan note |
-| 🩷 Pink | Missing note (linked but not written yet) |
+| 🟢 Verde | Hub / concepto |
+| ⚪ Crema | MOC (mapa de contenido) |
+| 🟡 Dorado | Unidad didáctica (UD) |
+| 🔵 Azul | Ficha de asignatura |
+| 🟣 Violeta | Práctica / proyecto |
+| 🟠 Naranja | Nota huérfana |
+| 🩷 Rosa | Nota inexistente (enlazada pero aún sin escribir) |
 
-## Run it locally
+## Ejecución en local
 
 ```bash
 git clone https://github.com/ndoreste/asir-knowledge-graph-3d.git
@@ -100,41 +100,41 @@ python -m http.server 8765
 # open http://localhost:8765
 ```
 
-`index.html` is fully self-contained, so it also works by double-clicking it.
+`index.html` es totalmente autocontenido, así que también funciona abriéndolo con doble clic.
 
-## Updating as the course progresses
+## Actualización a medida que avanza el curso
 
 ```powershell
 .\scripts\update-from-vault.ps1              # regenerate graph + sanitized index.html
 .\scripts\update-from-vault.ps1 -Video -Push # also re-record the video, commit and push
 ```
 
-See [docs/updating.md](docs/updating.md).
+Consulta [docs/updating.md](docs/updating.md).
 
-## Tech stack
+## Stack tecnológico
 
-- **Obsidian** (Markdown vault, frontmatter, wikilinks, templates)
-- **Node.js** (ES modules, no runtime dependencies)
-- **HTML / CSS / JavaScript** with the Canvas 2D API
-- **Playwright** (headless Chromium) + **ffmpeg** for the video
-- **PowerShell** for the update workflow
-- **GitHub Pages** for hosting
+- **Obsidian** (vault de Markdown, frontmatter, wikilinks, plantillas)
+- **Node.js** (módulos ES, sin dependencias en tiempo de ejecución)
+- **HTML / CSS / JavaScript** con la API Canvas 2D
+- **Playwright** (Chromium headless) + **ffmpeg** para el vídeo
+- **PowerShell** para el flujo de actualización
+- **GitHub Pages** para el alojamiento
 
-## Security & privacy policy
+## Política de seguridad y privacidad
 
-This repository never includes:
+Este repositorio nunca incluye:
 
-- The raw vault notes, PDFs or course material.
-- E-mail addresses, private LMS / Kahoot / NotebookLM / Google Drive links.
-- Teacher names or class timetables.
-- Local paths, credentials or `.obsidian/` configuration.
+- Las notas originales del vault, PDFs ni material del curso.
+- Direcciones de correo electrónico ni enlaces privados de LMS / Kahoot / NotebookLM / Google Drive.
+- Nombres de docentes ni horarios de clase.
+- Rutas locales, credenciales ni la configuración de `.obsidian/`.
 
-Details in [docs/privacy.md](docs/privacy.md).
+Detalles en [docs/privacy.md](docs/privacy.md).
 
-## Status
+## Estado
 
-Active — 1st year complete, 2nd year in progress (2026-2027).
+Activo: 1º completado, 2º en curso (2026-2027).
 
-## License
+## Licencia
 
-MIT — see [LICENSE](LICENSE).
+MIT. Consulta [LICENSE](LICENSE).

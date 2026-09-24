@@ -1,39 +1,39 @@
-# Vault structure
+# Estructura del vault
 
-The vault is not a PDF archive but a knowledge network: each teaching unit has a summary note, and notes connect through concepts shared across subjects and years.
+El vault no es un archivo de PDFs, sino una red de conocimiento: cada unidad didáctica tiene una nota de resumen, y las notas se conectan mediante conceptos compartidos entre asignaturas y cursos.
 
-## Folders
+## Carpetas
 
-| Folder | Content | Notes |
+| Carpeta | Contenido | Notas |
 |---|---|---:|
-| `HOME - FP ASIR.md` | Entry point (hub node of the graph) | 1 |
-| `MOC/` | Maps of Content: one per year, one per subject, plus `MOC - Conceptos` | 16 |
-| `Conceptos/` | One idea per note (RAID, DNS, normalization, LDAP…). The heart of the graph | 191 |
-| `1º ASIR/<Subject>/` | Subject sheet, `Unidades/` (UD notes + PDFs) and labs | 101 |
-| `2º ASIR/<Subject>/` | Same structure, filled in during the current year | 9 |
-| `Biblioteca/` | Reference material | 1 |
-| `Sistema/` | Usage guide, changelog, templates and `Grafo/` (tools in this repo) | — |
+| `HOME - FP ASIR.md` | Punto de entrada (nodo hub del grafo) | 1 |
+| `MOC/` | Maps of Content: uno por curso, uno por asignatura, más `MOC - Conceptos` | 16 |
+| `Conceptos/` | Una idea por nota (RAID, DNS, normalización, LDAP…). El corazón del grafo | 191 |
+| `1º ASIR/<Subject>/` | Ficha de la asignatura, `Unidades/` (notas de UD + PDFs) y prácticas | 101 |
+| `2º ASIR/<Subject>/` | Misma estructura, que se completa durante el curso actual | 9 |
+| `Biblioteca/` | Material de referencia | 1 |
+| `Sistema/` | Guía de uso, registro de cambios, plantillas y `Grafo/` (las herramientas de este repo) | — |
 
-### Subjects
+### Asignaturas
 
-**1º ASIR** — Databases · Hardware · Operating Systems (ISO) · Employability (ITE) · Markup Languages · Cloud Computing (MPO) · Networks · Intermodular Project
+**1º ASIR** — Bases de Datos · Hardware · Sistemas Operativos (ISO) · Empleabilidad (ITE) · Lenguajes de Marcas · Computación en la Nube (MPO) · Redes · Proyecto Intermodular
 
-**2º ASIR** — Operating Systems Administration (ASO) · Cloud Architecture (MPO) · Sustainability (SASP) · Network & Internet Services (SRI)
+**2º ASIR** — Administración de Sistemas Operativos (ASO) · Arquitectura Cloud (MPO) · Sostenibilidad (SASP) · Servicios de Red e Internet (SRI)
 
-## Note types
+## Tipos de nota
 
-| Type | Naming | Content |
+| Tipo | Nomenclatura | Contenido |
 |---|---|---|
-| **UD** | `SIGLA UDnn - Title` | Summary callout, key points, commands, review questions, concepts, previous/next unit |
-| **Concept** | Plain name | Definition, essentials, related concepts and an auto-generated *Aparece en* section |
-| **Subject sheet** | `Ficha - Subject` | Schedule, evaluation, links and units of the subject |
-| **MOC** | `MOC - Subject` | Ordered map of every note of a subject |
-| **Lab / project** | Free | Practical work, Packet Tracer, RAID, exercises |
+| **UD** | `SIGLA UDnn - Title` | Callout de resumen, puntos clave, comandos, preguntas de repaso, conceptos, unidad anterior/siguiente |
+| **Concepto** | Nombre sin más | Definición, lo esencial, conceptos relacionados y una sección *Aparece en* autogenerada |
+| **Ficha de asignatura** | `Ficha - Subject` | Horario, evaluación, enlaces y unidades de la asignatura |
+| **MOC** | `MOC - Subject` | Mapa ordenado de todas las notas de una asignatura |
+| **Práctica / proyecto** | Libre | Trabajo práctico, Packet Tracer, RAID, ejercicios |
 
-Templates for every type are in [`vault-tools/templates/`](../vault-tools/templates).
+Las plantillas de cada tipo están en [`vault-tools/templates/`](../vault-tools/templates).
 
-## Linking rules
+## Reglas de enlazado
 
-- Every UD links to its concepts and ends with `Volver a [[MOC - …]]`; that last MOC link becomes the node's *anchor* in the graph.
-- Concepts link to each other under *Relacionado con*; the *Aparece en* section is written by the generator and must not be edited by hand.
-- Zero orphans and zero missing links is the target after each run.
+- Cada UD enlaza a sus conceptos y termina con `Volver a [[MOC - …]]`; ese último enlace al MOC se convierte en el *anchor* del nodo en el grafo.
+- Los conceptos se enlazan entre sí bajo *Relacionado con*; la sección *Aparece en* la escribe el generador y no debe editarse a mano.
+- El objetivo tras cada ejecución es cero huérfanas y cero enlaces faltantes.

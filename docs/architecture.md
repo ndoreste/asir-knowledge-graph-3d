@@ -1,24 +1,24 @@
-# Architecture
+# Arquitectura
 
-The project has three stages. Each one is a single file with no runtime dependencies except the video recorder.
+El proyecto tiene tres etapas. Cada una es un único archivo sin dependencias en tiempo de ejecución, salvo el grabador de vídeo.
 
-## 1. Graph generator — `vault-tools/generar-grafo.mjs`
+## 1. Generador del grafo — `vault-tools/generar-grafo.mjs`
 
-Lives inside the vault at `Sistema/Grafo/` and is run with `node "Sistema/Grafo/generar-grafo.mjs"`.
+Vive dentro del vault en `Sistema/Grafo/` y se ejecuta con `node "Sistema/Grafo/generar-grafo.mjs"`.
 
-1. **Walk** every `.md` file (skipping `.obsidian/`, `.git/`, `.trash/`, `node_modules/`). `Sistema/` and `CLAUDE.md` resolve as link targets but are hidden from the graph.
-2. **Parse** YAML-like frontmatter (`tipo`, `curso`, `area`, `tags`…) and every `[[wikilink]]`, including aliases (`[[Note|alias]]`), anchors (`[[Note#Heading]]`), block refs, embeds (`![[file.pdf]]`) and escaped aliases inside tables. Code blocks are stripped first so example links are ignored.
-3. **Classify** each note: `hub`, `moc`, `concepto`, `ud`, `ficha`, `practica` or `nota`, and assign a course (1º / 2º) from its folder or frontmatter.
-4. **Resolve** links by note name or by path; real attachments are detected by extension, so `Enlace troncal 802.1Q` is treated as a note, not a `.1q` file.
-5. **Write back** auto-generated content, only when it changes:
-   - The *Aparece en* (“appears in”) section of every concept, grouped by course, between `<!-- AUTO:aparece-en -->` markers.
-   - The concept index in `MOC - Conceptos`, grouped by area with usage counts.
-6. **Emit** `grafo-data.js` (`window.GRAFO_DATA = { stats, nodes, links }`) and `grafo-completo.html` (viewer + data inlined, embeddable in an Obsidian iframe).
-7. **Report** orphans, missing notes, broken attachments and duplicated note names.
+1. **Recorre** todos los archivos `.md` (omitiendo `.obsidian/`, `.git/`, `.trash/`, `node_modules/`). `Sistema/` y `CLAUDE.md` se resuelven como destinos de enlace, pero se ocultan en el grafo.
+2. **Analiza** el frontmatter de tipo YAML (`tipo`, `curso`, `area`, `tags`…) y cada `[[wikilink]]`, incluidos alias (`[[Note|alias]]`), anclas (`[[Note#Heading]]`), referencias a bloques, embeds (`![[file.pdf]]`) y alias escapados dentro de tablas. Primero se eliminan los bloques de código para ignorar los enlaces de ejemplo.
+3. **Clasifica** cada nota: `hub`, `moc`, `concepto`, `ud`, `ficha`, `practica` o `nota`, y le asigna un curso (1º / 2º) según su carpeta o su frontmatter.
+4. **Resuelve** los enlaces por nombre de nota o por ruta; los adjuntos reales se detectan por extensión, de modo que `Enlace troncal 802.1Q` se trata como una nota y no como un archivo `.1q`.
+5. **Escribe de vuelta** el contenido autogenerado, solo cuando cambia:
+   - La sección *Aparece en* de cada concepto, agrupada por curso, entre los marcadores `<!-- AUTO:aparece-en -->`.
+   - El índice de conceptos en `MOC - Conceptos`, agrupado por área con recuento de usos.
+6. **Genera** `grafo-data.js` (`window.GRAFO_DATA = { stats, nodes, links }`) y `grafo-completo.html` (visor + datos incrustados, embebible en un iframe de Obsidian).
+7. **Informa** de huérfanas, notas inexistentes, adjuntos rotos y nombres de nota duplicados.
 
-Run with `--sin-escribir` for a dry run that never touches the notes.
+Ejecútalo con `--sin-escribir` para hacer una prueba en seco que nunca modifica las notas.
 
-### Data model
+### Modelo de datos
 
 ```js
 {
@@ -29,26 +29,26 @@ Run with `--sin-escribir` for a dry run that never touches the notes.
 }
 ```
 
-Missing notes become pink `faltante:` nodes so gaps in the knowledge base are visible.
+Las notas inexistentes se convierten en nodos rosas `faltante:` para que los huecos de la base de conocimiento sean visibles.
 
-## 2. 3D viewer — `vault-tools/grafo-asir.html`
+## 2. Visor 3D — `vault-tools/grafo-asir.html`
 
-A single HTML file, ~500 lines, using only the **Canvas 2D API**:
+Un único archivo HTML, de unas ~500 líneas, que solo usa la **API Canvas 2D**:
 
-- Deterministic layout: nodes are placed with a seeded hash of their id, so the graph looks the same on every load.
-- Hand-written perspective projection, yaw/tilt orbit, wheel zoom, auto-spin and `prefers-reduced-motion` support.
-- Hit-testing for hover/click, a detail panel with the note summary, search, year filters (1º / 2º / concepts) and toggles for labels and links.
-- Styling follows the “JARVIS” gold-on-black palette shared with my other projects.
+- Layout determinista: los nodos se colocan con un hash con semilla de su id, así que el grafo se ve igual en cada carga.
+- Proyección en perspectiva escrita a mano, órbita de guiñada/inclinación, zoom con la rueda, giro automático y soporte de `prefers-reduced-motion`.
+- Hit-testing para hover/clic, un panel de detalle con el resumen de la nota, búsqueda, filtros por curso (1º / 2º / conceptos) y conmutadores para etiquetas y enlaces.
+- El estilo sigue la paleta dorado sobre negro «JARVIS» que comparto con mis otros proyectos.
 
-## 3. Public build — `scripts/build-public.mjs`
+## 3. Build público — `scripts/build-public.mjs`
 
-Reads `grafo-data.js`, sanitizes every node preview, injects the data into the viewer template and writes `index.html`. See [privacy.md](privacy.md).
+Lee `grafo-data.js`, sanea la vista previa de cada nodo, inyecta los datos en la plantilla del visor y escribe `index.html`. Consulta [privacy.md](privacy.md).
 
-## 4. Video — `scripts/record-video.cjs`
+## 4. Vídeo — `scripts/record-video.cjs`
 
-Real-time screen capture drops frames, so the recorder drives the page instead:
+La captura de pantalla en tiempo real pierde fotogramas, así que el grabador controla la página en su lugar:
 
-1. Opens `index.html` in headless Chromium at 1920×1080.
-2. Hides the cursor and tooltips, disables the built-in spin.
-3. For each of the 600 frames (10 s × 60 fps) it takes a screenshot and then advances the camera by synthetic pointer/wheel events along a scripted path (top → front → bottom → top with a zoom in/out).
-4. Encodes the PNG sequence with ffmpeg (two-pass H.264, ~7 Mbps → ~8 MB).
+1. Abre `index.html` en Chromium headless a 1920×1080.
+2. Oculta el cursor y los tooltips, y desactiva el giro integrado.
+3. Para cada uno de los 600 fotogramas (10 s × 60 fps) toma una captura de pantalla y después avanza la cámara mediante eventos sintéticos de puntero/rueda a lo largo de una trayectoria programada (arriba → frente → abajo → arriba, con un zoom de acercamiento/alejamiento).
+4. Codifica la secuencia PNG con ffmpeg (H.264 a dos pasadas, ~7 Mbps → ~8 MB).
