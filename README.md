@@ -2,7 +2,7 @@
 
 Grafo de conocimiento 3D interactivo de mis estudios de FP ASIR (Administración de Sistemas Informáticos en Red), construido sobre un vault de Obsidian con un pipeline propio en Node.js y un renderizador en Canvas sin dependencias.
 
-**[▶ Demo en vivo](https://ndoreste.github.io/asir-knowledge-graph-3d/)** · **[🎬 Vídeo de demostración (MP4)](assets/video/asir-knowledge-graph-3d-demo.mp4)**
+**[▶ Demo en vivo](https://ndoreste.github.io/asir-knowledge-graph-3d/)** · **[🎬 Vídeo de demostración (MP4)](https://ndoreste.github.io/asir-knowledge-graph-3d/assets/video/asir-knowledge-graph-3d-demo.mp4)**
 
 [![Grafo de conocimiento 3D girando](assets/img/graph-preview.gif)](https://ndoreste.github.io/asir-knowledge-graph-3d/)
 
