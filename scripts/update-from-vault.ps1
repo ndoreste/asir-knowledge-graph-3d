@@ -5,7 +5,7 @@
 .DESCRIPTION
   1. Regenerates the graph inside the vault (generar-grafo.mjs).
   2. Syncs the vault tools (generator + viewer template) into vault-tools/.
-  3. Builds the sanitized public graph (index.html).
+  3. Builds the sanitized public graph (index.html) and refreshes the vault's grafo-publico.html.
   4. Optionally re-records the demo video (-Video) and commits + pushes (-Push).
 
 .EXAMPLE
@@ -33,6 +33,8 @@ Copy-Item (Join-Path $GraphDir "generar-grafo.mjs"), (Join-Path $GraphDir "grafo
 Write-Host "3/4 Generando index.html público (saneado)..."
 node (Join-Path $Root "scripts\build-public.mjs") --vault $VaultPath
 if ($LASTEXITCODE -ne 0) { throw "build-public.mjs ha fallado: no se publica nada" }
+node (Join-Path $GraphDir "sanear-para-publicar.mjs")
+if ($LASTEXITCODE -ne 0) { throw "sanear-para-publicar.mjs ha fallado (grafo-publico.html de la bóveda)" }
 
 if ($Video) {
   Write-Host "4/4 Grabando el vídeo (servidor local en :8765)..."
