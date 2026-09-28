@@ -43,6 +43,7 @@
   .search { width: 190px; padding: 6px 10px; border-radius: 6px; border: 1px solid rgba(240,236,224,.16); background: rgba(10,10,10,.85); color: var(--cream); font: 12px var(--mono); }
   .search::placeholder { color: #6f6b60; }
   .search:focus { outline: none; border-color: var(--gold); }
+  .search.miss { border-color: #e0685a; }
 
   .legend { position: absolute; bottom: 16px; left: 0; right: 0; display: flex; justify-content: center; flex-wrap: wrap; gap: 6px 18px; font-size: 12px; color: var(--muted); z-index: 2; pointer-events: none; padding: 0 16px; }
   .legend span { display: inline-flex; align-items: center; gap: 7px; }
@@ -322,12 +323,35 @@
   function closePanel() { sel = -1; $("panel").classList.remove("on"); st.dirty = true; }
   $("px").onclick = closePanel;
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") closePanel(); });
-  $("q").addEventListener("keydown", (e) => {
-    if (e.key !== "Enter") return;
-    const q = e.target.value.trim().toLowerCase(); if (!q) return;
+  /* Búsqueda sin tildes ni mayúsculas: "direccion ip" encuentra "Dirección IP".
+     Si la frase entera no aparece, vale con que estén todas sus palabras. */
+  const norm = (s) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
+  const normNames = nodes.map((n) => norm(n.name));
+  function findNote(raw) {
+    const q = norm(raw); if (!q) return -1;
+    const words = q.split(/\s+/);
     let best = -1, bs = 1e9;
-    nodes.forEach((n, i) => { const k = n.name.toLowerCase().indexOf(q); if (k >= 0 && n.kind !== "faltante") { const sc = k * 10 + n.name.length; if (sc < bs) { bs = sc; best = i; } } });
+    nodes.forEach((n, i) => {
+      if (n.kind === "faltante") return;
+      const name = normNames[i], k = name.indexOf(q);
+      let sc = k >= 0 ? k * 10 + name.length : words.every((w) => name.includes(w)) ? 1e6 + name.length : null;
+      if (name === q) sc = -1e6;
+      if (sc !== null && sc < bs) { bs = sc; best = i; }
+    });
+    return best;
+  }
+  function runSearch(input) {
+    const best = findNote(input.value);
+    input.classList.toggle("miss", best < 0 && input.value.trim() !== "");
     if (best >= 0) { if (!visible[best]) applyFilter("all"); openPanel(best); }
+  }
+  const qIn = $("q");
+  qIn.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); runSearch(qIn); } });
+  /* Elegir una sugerencia de la lista (con ratón o flechas) no pulsa Enter: abre la tarjeta al coincidir exacto. */
+  qIn.addEventListener("input", () => {
+    qIn.classList.remove("miss");
+    const exact = normNames.indexOf(norm(qIn.value));
+    if (exact >= 0 && nodes[exact].kind !== "faltante") runSearch(qIn);
   });
 
   /* ------------------------------------------------------------- render */
