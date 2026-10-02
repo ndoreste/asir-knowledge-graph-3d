@@ -233,6 +233,8 @@ const AREA_LABEL = {
   seguridad: "Seguridad",
   sostenibilidad: "Sostenibilidad",
   empleabilidad: "Empleabilidad",
+  digitalizacion: "Digitalización",
+  idiomas: "Inglés profesional",
 };
 
 function conceptIndex() {
