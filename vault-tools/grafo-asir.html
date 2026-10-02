@@ -68,6 +68,8 @@
   .nb { text-align: left; display: flex; align-items: center; gap: 8px; padding: 5px 6px; border-radius: 6px; border: 0; background: transparent; color: var(--cream); font: 12px var(--mono); cursor: pointer; }
   .nb:hover { background: rgba(245,179,1,.08); }
   .nb i { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+  .nbg { font-size: 10px; font-weight: 600; letter-spacing: .14em; margin: 8px 0 2px; padding: 0 6px 3px; border-bottom: 1px solid rgba(240,236,224,.12); position: sticky; top: 0; background: rgba(12,10,4,.96); }
+  .nbg:first-child { margin-top: 0; }
 
   .empty { position: absolute; inset: 0; display: none; place-items: center; text-align: center; color: var(--muted); font-size: 13px; z-index: 4; padding: 24px; }
   .empty code { color: var(--gold); }
@@ -298,6 +300,13 @@
 
   /* --------------------------------------------------------------- panel */
   const courseLabel = (n) => (n.course ? `${n.course}º ASIR` : (n.courses || []).map((c) => `${c}º`).join(" + ") || "transversal");
+  const NB_GROUPS = [
+    { key: "1", label: "1º ASIR", color: J.gold },
+    { key: "2", label: "2º ASIR", color: "#9a7bd6" },
+    { key: "c", label: "CONCEPTOS", color: J.green },
+    { key: "o", label: "GENERAL", color: J.cream },
+  ];
+  const nbGroup = (n) => (n.kind === "concepto" ? "c" : n.course === "1" || n.course === "2" ? n.course : "o");
   function openPanel(i) {
     sel = i; const n = nodes[i];
     $("pk").textContent = n.orphan ? "NOTA HUÉRFANA" : KIND[n.kind]?.es ?? n.kind.toUpperCase();
@@ -311,12 +320,20 @@
     const list = $("pl"); list.textContent = "";
     const nb = [...adj[i]].sort((a, b) => nodes[a].name.localeCompare(nodes[b].name, "es"));
     $("pnh").textContent = `CONEXIONES (${nb.length})`;
-    for (const j of nb) {
-      const b = document.createElement("button"); b.className = "nb";
-      const dot = document.createElement("i"); dot.style.background = color[j];
-      b.append(dot, nodes[j].name);
-      b.onclick = () => { if (!visible[j]) applyFilter("all"); openPanel(j); };
-      list.appendChild(b);
+    // Conexiones agrupadas por curso, para ver de un vistazo qué es de 1º y qué de 2º.
+    for (const g of NB_GROUPS) {
+      const items = nb.filter((j) => nbGroup(nodes[j]) === g.key);
+      if (!items.length) continue;
+      const h = document.createElement("div"); h.className = "nbg"; h.style.color = g.color;
+      h.textContent = `${g.label} (${items.length})`;
+      list.appendChild(h);
+      for (const j of items) {
+        const b = document.createElement("button"); b.className = "nb";
+        const dot = document.createElement("i"); dot.style.background = color[j];
+        b.append(dot, nodes[j].name);
+        b.onclick = () => { if (!visible[j]) applyFilter("all"); openPanel(j); };
+        list.appendChild(b);
+      }
     }
     $("panel").classList.add("on"); st.dirty = true;
   }
