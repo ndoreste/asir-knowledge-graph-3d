@@ -7,10 +7,10 @@ El vault no es un archivo de PDFs, sino una red de conocimiento: cada unidad did
 | Carpeta | Contenido | Notas |
 |---|---|---:|
 | `HOME - FP ASIR.md` | Punto de entrada (nodo hub del grafo) | 1 |
-| `MOC/` | Maps of Content: uno por curso, uno por asignatura, más `MOC - Conceptos` | 16 |
-| `Conceptos/` | Una idea por nota (RAID, DNS, normalización, LDAP…). El corazón del grafo | 191 |
+| `MOC/` | Maps of Content: uno por curso, uno por asignatura, más `MOC - Conceptos` | 22 |
+| `Conceptos/` | Una idea por nota (RAID, DNS, normalización, LDAP…). El corazón del grafo | 302 |
 | `1º ASIR/<Subject>/` | Ficha de la asignatura, `Unidades/` (notas de UD + PDFs) y prácticas | 101 |
-| `2º ASIR/<Subject>/` | Misma estructura, que se completa durante el curso actual | 9 |
+| `2º ASIR/<Subject>/` | Misma estructura: temario completo resumido, que se amplía con apuntes de clase durante el curso | 84 |
 | `Biblioteca/` | Material de referencia | 1 |
 | `Sistema/` | Guía de uso, registro de cambios, plantillas y `Grafo/` (las herramientas de este repo) | — |
 
@@ -18,7 +18,7 @@ El vault no es un archivo de PDFs, sino una red de conocimiento: cada unidad did
 
 **1º ASIR** — Bases de Datos · Hardware · Sistemas Operativos (ISO) · Empleabilidad (ITE) · Lenguajes de Marcas · Computación en la Nube (MPO) · Redes · Proyecto Intermodular
 
-**2º ASIR** — Administración de Sistemas Operativos (ASO) · Arquitectura Cloud (MPO) · Sostenibilidad (SASP) · Servicios de Red e Internet (SRI)
+**2º ASIR** — Administración de Sistemas Operativos (ASO) · Servicios de Red e Internet (SRI) · Seguridad y Alta Disponibilidad (SAD) · Administración de SGBD (ASGBD) · Implantación de Aplicaciones Web (IAW) · Sostenibilidad (SASP) · Digitalización (DIG) · Empleabilidad II (IPE2) · Inglés profesional (ING) · Arquitectura Cloud (MPO)
 
 ## Tipos de nota
 

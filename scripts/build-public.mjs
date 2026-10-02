@@ -32,11 +32,11 @@ const OUT = join(ROOT, "index.html");
 
 const EMAIL = /[\w.+-]+@[\w-]+(\.[\w-]+)+/g;
 const PRIVATE_URL =
-  /https?:\/\/[^\s"'\\)\]<>]*(thepowermba|thepower\.education|kahoot|notebooklm\.google|drive\.google|docs\.google|forms\.gle|forms\.office|classroom\.google|teams\.microsoft|meet\.google)[^\s"'\\)\]<>]*/gi;
+  /https?:\/\/[^\s"'\\)\]<>]*(thepowermba|github\.com\/jesusninoc|thepower\.education|kahoot|notebooklm\.google|drive\.google|docs\.google|forms\.gle|forms\.office|classroom\.google|teams\.microsoft|meet\.google)[^\s"'\\)\]<>]*/gi;
 const TRACKING_PARAM = /([?&])(si|authuser|utm_[a-z]+)=[^&\s"'<>]*&?/gi;
 const NAME_WORD = "[A-ZÁÉÍÓÚÑ][A-Za-zÁÉÍÓÚÑáéíóúñü.]*";
 const TEACHER = new RegExp(
-  `\\b(Profesor(?:\\/a|a)?|PROFESOR(?:A)?|Tutor(?:a)?|TUTOR(?:A)?|Docente)(\\s*:\\s*|\\s+)(${NAME_WORD}(?:\\s+${NAME_WORD}){0,4})`,
+  `\\b(Profe|Profesor(?:\\/a|a)?|PROFESOR(?:A)?|Tutor(?:a)?|TUTOR(?:A)?|Docente)(\\s*:\\s*|\\s+)(${NAME_WORD}(?:\\s+${NAME_WORD}){0,4})`,
   "g",
 );
 // Hasta el siguiente separador " - ", "·" o "|" (los rangos 16:00-17:00 no cortan).
