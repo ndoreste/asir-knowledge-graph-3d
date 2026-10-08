@@ -8,7 +8,7 @@ El vault no es un archivo de PDFs, sino una red de conocimiento: cada unidad did
 |---|---|---:|
 | `HOME - FP ASIR.md` | Punto de entrada (nodo hub del grafo) | 1 |
 | `MOC/` | Maps of Content: uno por curso, uno por asignatura, más `MOC - Conceptos` | 22 |
-| `Conceptos/` | Una idea por nota (RAID, DNS, normalización, LDAP…). El corazón del grafo | 302 |
+| `Conceptos/` | Una idea por nota (RAID, DNS, normalización, LDAP…). El corazón del grafo | 305 |
 | `1º ASIR/<Subject>/` | Ficha de la asignatura, `Unidades/` (notas de UD + PDFs) y prácticas | 101 |
 | `2º ASIR/<Subject>/` | Misma estructura: temario completo resumido, que se amplía con apuntes de clase durante el curso | 84 |
 | `Biblioteca/` | Material de referencia | 1 |
