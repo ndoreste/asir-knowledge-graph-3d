@@ -17,11 +17,11 @@ Convertir dos años de material del ciclo en una **red de conocimiento conectada
 - Un script generador mantiene actualizados automáticamente los backlinks, los índices y los datos del grafo.
 - El resultado se puede explorar como un grafo 3D en el navegador: rotar, hacer zoom, filtrar por curso y hacer clic en cualquier nodo para leer su resumen.
 
-## Estado actual (2026-10-29)
+## Estado actual (2026-10-30)
 
 | Notas | Enlaces | Unidades didácticas | Conceptos | Huérfanas | Enlaces faltantes |
 |---:|---:|---:|---:|---:|---:|
-| 514 | 5460 | 126 | 305 | 0 | 0 |
+| 514 | 5461 | 126 | 305 | 0 | 0 |
 
 ## Qué demuestra este proyecto
 
